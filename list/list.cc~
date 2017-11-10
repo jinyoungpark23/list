@@ -1,0 +1,173 @@
+#include <cmath>
+
+#include "list.h"
+
+// Create node
+list_node::list_node(){
+  prev = NULL;
+  data = 0;
+  next = NULL;
+}
+
+// Create node with given prev and next pointers
+list_node::list_node(list_node* p, list_node* n){
+  prev = p;
+  data = 0;
+  next = n;
+}
+
+// Create node with given prev, next pointers, and data
+list_node::list_node(list_node* p, const list_element& d, list_node* n){
+  prev = p;
+  data = d;
+  next = n;
+}
+
+// Create an empty doubly-linked list with front and rear sentinels,
+// current points to rear, and current_index = 0
+list::list(){
+  _front = new list_node();
+  _rear = new list_node(_front, NULL);
+  _front->next = _rear;
+  _current = _rear;
+  _current_index = 1;
+  _size = 0;
+}
+
+// Delete all nodes (including the sentinels)
+list::~list(){
+  _destroy();
+}
+
+// Make a (deep) copy of a list
+// current_index and current can be set arbitrarily in the copy
+list::list(const list& orig){
+
+}
+
+// Support list assignment, with deep copy
+// Similarly, current_index and current are set arbitrarily
+list& list::operator=(const list& rhs){
+  
+}
+
+// Insert a new element at a position (k) given by index
+void list::add(const list_element& item, int index){
+  _set_current_index(index);
+  list_node* pNode = new list_node(_current->prev, item, _current);
+  _current->prev->next = pNode;
+  _current->prev = pNode;
+  _size++;
+}
+
+// Remove an element from this list at an index
+void list::remove_at(int index){
+  _set_current_index(index);
+  _current->prev->next = _current->next;
+  _current->next->prev = _current->prev;
+  delete _current;
+  _size--;
+}
+
+// Let i be the smallest non-negative integer where get(i) == item
+// Remove the node at index i
+void list::remove(const list_element& item){
+  
+}
+
+// Return smallest non-negative integer where get(i) == item
+// or size() if no such integer
+size_t list::find(const list_element& item) const{
+  
+}
+
+// Return the element at position k
+list_element list::get(int index) const{
+  _set_current_index(index);
+  return _current->data;
+}
+
+// Return the number of elements of the list
+size_t list::size() const{
+  return _size;
+}
+
+// Output the list to ostr using format
+// <v0, v1, v2, v3, ... , vn-1>
+void list::output(std::ostream& ostr) const{
+  if(_size == 0){
+    ostr << "<>" << std::endl;
+    return;
+  }
+  ostr << "<" << _front->next->data;
+  for(_current = _front->next->next; _current != _rear; _current = _current->next){
+    ostr << ", " << _current->data;
+  }
+  ostr << ">" << std::endl;
+  _current_index = _size;
+}
+
+// Return the effect non-negative index
+size_t list::_compute_index(int index) const{
+  if(index >= 0 && index < _size) return index;
+  if(index < 0) return _compute_index(index + _size);
+  if(index >= _size) return _compute_index(index - _size);
+}
+
+// Set _current and _current_index to index
+void list::_set_current_index(size_t index) const{
+  index = _compute_index(index);
+
+  size_t dFront = index + 1;
+  size_t dRear = _size - index;
+  size_t dCurrent = std::abs((double)_current_index - index);
+
+  // If current pointer is the closest
+  if(dCurrent <= dFront && dCurrent <= dRear){
+    if(_current_index > index){
+      while(_current_index > index){
+	_current = _current->prev;
+	_current_index--;
+      }
+    }
+    else if(_current_index < index){
+      while(_current_index < index){
+	_current = _current->next;
+	_current_index++;
+      }
+    }
+    else return;
+  }
+
+  // If front pointer is the closest
+  else if(dFront <= dRear){
+    _current = _front->next;
+    for(_current_index = 0; _current_index < index; _current_index++)
+      _current = _current->next;
+  }
+
+  // If rear pointer is the closest
+  else{
+    _current = _rear->prev;
+    for(_current_index = _size - 1; _current_index > index; _current_index--)
+      _current = _current->prev;
+  }
+  
+}
+
+void list::_init(){
+
+}
+
+void list::_copy(const list& orig){
+
+}
+
+void list::_destroy(){
+  _current = _front->next;
+  while(_current != _rear){
+    _current = _current->next;
+    delete _current->prev;
+  }
+  delete _front; delete _rear;
+}
